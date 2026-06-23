@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,8 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.androidcalculator.ui.theme.AndroidCalculatorTheme
 
@@ -26,16 +25,14 @@ fun Calculator(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.primaryContainer)
-                .weight(2.5f)
-                .padding(end = 37.dp, bottom = 14.dp),
+                .background(color = MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.BottomEnd
         ) {
             Column(
@@ -58,8 +55,6 @@ fun Calculator(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.5f),
-            contentAlignment = Alignment.Center
         ) {
             val mathSymbols = listOf("√", "π", "^", "!")
             RowMathSymbols(listOfMathSymbols = mathSymbols)
@@ -67,13 +62,11 @@ fun Calculator(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(4f),
-            contentAlignment = Alignment.TopCenter
         ) {
             Column(
                 modifier = Modifier
             ) {
-                val firstList = listOf("AC", "(  )", "%", "÷")
+                val firstList = listOf("AC", "( )", "%", "÷")
                 val secondList = listOf("7", "8", "9", "X")
                 val thirdList = listOf("4", "5", "6", "-")
                 val fourthList = listOf("1", "2", "3", "+")
@@ -95,19 +88,21 @@ private fun CalculatorPreview() {
         Calculator()
     }
 }
-
 @Composable
 private fun MathSymbols(
+    modifier: Modifier,
     symbol: String
 ) {
     Box(
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = symbol,
             fontSize = 30.sp,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -122,7 +117,11 @@ private fun RowMathSymbols(
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         for(i in listOfMathSymbols) {
-            MathSymbols(symbol = i)
+            MathSymbols(
+                modifier = Modifier
+                    .weight(1f),
+                symbol = i
+            )
         }
     }
 }
@@ -141,7 +140,8 @@ private fun CalcButton(
         Text(
             text = symbol,
             fontSize = 40.sp,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -151,12 +151,10 @@ private fun RowsCalcButton(
     modifier: Modifier = Modifier,
     listSymbols: List<String>
 ) {
-    val blueSymbolBoxes = listOf("(  )", "%", "÷", "X", "-", "+", "=")
+    val blueSymbolBoxes = listOf("( )", "%", "÷", "X", "-", "+", "=")
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 10.dp, end = 10.dp, bottom = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         for(i in listSymbols){
             val color: Color
@@ -173,7 +171,7 @@ private fun RowsCalcButton(
             CalcButton(
                 modifier = Modifier
                     .weight(if(i == "0") 2f else 1f)
-                    .aspectRatio(if(i == "0") 2f else 1/1f),
+                    .aspectRatio(if(i == "0") 2f else 1 / 1f),
                 symbol = i,
                 boxColor = color
             )
