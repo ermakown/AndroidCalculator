@@ -8,15 +8,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.androidcalculator.ui.theme.AndroidCalculatorTheme
 
@@ -27,15 +32,27 @@ fun Calculator(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = MaterialTheme.colorScheme.background),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.primaryContainer),
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 0.dp,
+                        topEnd = 0.dp,
+                        bottomEnd = 40.dp,
+                        bottomStart = 40.dp
+                    )
+                )
+                .background(color = MaterialTheme.colorScheme.primaryContainer)
+                .weight(1f),
             contentAlignment = Alignment.BottomEnd
         ) {
             Column(
+                modifier = Modifier
+                    .padding(end = 40.dp, start = 40.dp, bottom = 16.dp),
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
@@ -64,7 +81,7 @@ fun Calculator(
                 .fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val firstList = listOf("AC", "( )", "%", "÷")
                 val secondList = listOf("7", "8", "9", "X")
@@ -134,6 +151,7 @@ private fun CalcButton(
 ) {
     Box(
         modifier = modifier
+            .clip(CircleShape)
             .background(boxColor),
         contentAlignment = Alignment.Center,
     ) {
@@ -154,7 +172,8 @@ private fun RowsCalcButton(
     val blueSymbolBoxes = listOf("( )", "%", "÷", "X", "-", "+", "=")
     Row(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         for(i in listSymbols){
             val color: Color
