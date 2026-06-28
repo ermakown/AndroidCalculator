@@ -1,6 +1,8 @@
 package com.example.androidcalculator
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,10 +16,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key.Companion.Calculator
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,6 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.androidcalculator.ui.theme.AndroidCalculatorTheme
 
+
+val expression = mutableStateOf("45x8")
+val expressionBottom = mutableStateOf("360")
 @Composable
 fun Calculator(
     modifier: Modifier = Modifier
@@ -56,13 +63,13 @@ fun Calculator(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = "45x8",
+                    text = expression.value,
                     fontSize = 36.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "360",
+                    text = expressionBottom.value,
                     fontSize = 17.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontWeight = FontWeight.SemiBold
@@ -73,7 +80,6 @@ fun Calculator(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            val mathSymbols = listOf("√", "π", "^", "!")
             RowMathSymbols(listOfMathSymbols = mathSymbols)
         }
         Box(
@@ -83,11 +89,6 @@ fun Calculator(
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val firstList = listOf("AC", "( )", "%", "÷")
-                val secondList = listOf("7", "8", "9", "X")
-                val thirdList = listOf("4", "5", "6", "-")
-                val fourthList = listOf("1", "2", "3", "+")
-                val fifthList = listOf("0", ",", "=")
                 RowsCalcButton(listSymbols = firstList)
                 RowsCalcButton(listSymbols = secondList)
                 RowsCalcButton(listSymbols = thirdList)
@@ -152,6 +153,10 @@ private fun CalcButton(
     Box(
         modifier = modifier
             .clip(CircleShape)
+            .clickable {
+                Log.d("Calculator", "Button $symbol is clicked")
+                checkACButton(symbol)
+            }
             .background(boxColor),
         contentAlignment = Alignment.Center,
     ) {
@@ -169,7 +174,6 @@ private fun RowsCalcButton(
     modifier: Modifier = Modifier,
     listSymbols: List<String>
 ) {
-    val blueSymbolBoxes = listOf("( )", "%", "÷", "X", "-", "+", "=")
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -197,3 +201,13 @@ private fun RowsCalcButton(
         }
     }
 }
+
+private fun checkACButton(symbol: String) {
+    when(symbol) {
+        "AC" -> {
+            expression.value = ""
+            expressionBottom.value = ""
+        }
+    }
+}
+
