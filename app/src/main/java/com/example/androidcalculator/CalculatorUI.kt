@@ -1,6 +1,5 @@
 package com.example.androidcalculator
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,26 +15,31 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key.Companion.Calculator
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.androidcalculator.Data.Symbol
+import com.example.androidcalculator.Data.Symbol.Companion.blueSymbolBoxes
+import com.example.androidcalculator.Data.Symbol.Companion.fifthList
+import com.example.androidcalculator.Data.Symbol.Companion.firstList
+import com.example.androidcalculator.Data.Symbol.Companion.fourthList
+import com.example.androidcalculator.Data.Symbol.Companion.mathSymbols
+import com.example.androidcalculator.Data.Symbol.Companion.secondList
+import com.example.androidcalculator.Data.Symbol.Companion.thirdList
 import com.example.androidcalculator.ui.theme.AndroidCalculatorTheme
 
-
-val expression = mutableStateOf("45x8")
-val expressionBottom = mutableStateOf("360")
+val viewModel = CalculatorViewModel()
 @Composable
 fun Calculator(
     modifier: Modifier = Modifier
 ) {
+    val state = viewModel.state.value
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -63,13 +67,13 @@ fun Calculator(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = expression.value,
+                    text = state.expression,
                     fontSize = 36.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = expressionBottom.value,
+                    text = state.result,
                     fontSize = 17.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontWeight = FontWeight.SemiBold
@@ -79,14 +83,19 @@ fun Calculator(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 8.dp)
         ) {
             RowMathSymbols(listOfMathSymbols = mathSymbols)
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .padding(bottom = 8.dp)
         ) {
             Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 RowsCalcButton(listSymbols = firstList)
@@ -102,21 +111,25 @@ fun Calculator(
 @Preview
 @Composable
 private fun CalculatorPreview() {
-    AndroidCalculatorTheme() {
+    AndroidCalculatorTheme {
         Calculator()
     }
 }
 @Composable
 private fun MathSymbols(
     modifier: Modifier,
-    symbol: String
+    symbol: Symbol
 ) {
     Box(
-        modifier = modifier,
+        modifier = modifier
+            .clip(CircleShape)
+            .clickable {
+                viewModel.processCommand(CalculatorCommand.Input(symbol))
+            },
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = symbol,
+            text = symbol.displayText,
             fontSize = 30.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -127,7 +140,7 @@ private fun MathSymbols(
 
 @Composable
 private fun RowMathSymbols(
-    listOfMathSymbols: List<String>
+    listOfMathSymbols: List<Symbol>
 ) {
     Row(
         modifier = Modifier
@@ -147,21 +160,25 @@ private fun RowMathSymbols(
 @Composable
 private fun CalcButton(
     modifier: Modifier = Modifier,
-    symbol: String,
+    symbol: Symbol,
     boxColor: Color
 ) {
     Box(
         modifier = modifier
             .clip(CircleShape)
             .clickable {
-                Log.d("Calculator", "Button $symbol is clicked")
-                checkACButton(symbol)
+                val command = when(symbol) {
+                    Symbol.CLEAR -> CalculatorCommand.Clear
+                    Symbol.EVALUATE -> CalculatorCommand.Evaluate
+                    else -> CalculatorCommand.Input(symbol)
+                }
+                viewModel.processCommand(command)
             }
             .background(boxColor),
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = symbol,
+            text = symbol.displayText,
             fontSize = 40.sp,
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             textAlign = TextAlign.Center
@@ -172,7 +189,7 @@ private fun CalcButton(
 @Composable
 private fun RowsCalcButton(
     modifier: Modifier = Modifier,
-    listSymbols: List<String>
+    listSymbols: List<Symbol>
 ) {
     Row(
         modifier = modifier
@@ -180,21 +197,22 @@ private fun RowsCalcButton(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         for(i in listSymbols){
-            val color: Color
-            if(i in blueSymbolBoxes) {
-                color = MaterialTheme.colorScheme.tertiary
-            }
-            else if (i == "AC") {
-                color = MaterialTheme.colorScheme.secondary
-            }
-            else {
-                color = MaterialTheme.colorScheme.primary
+            val color: Color = when (i) {
+                in blueSymbolBoxes -> {
+                    MaterialTheme.colorScheme.tertiary
+                }
+                Symbol.CLEAR -> {
+                    MaterialTheme.colorScheme.secondary
+                }
+                else -> {
+                    MaterialTheme.colorScheme.primary
+                }
             }
 
             CalcButton(
                 modifier = Modifier
-                    .weight(if(i == "0") 2f else 1f)
-                    .aspectRatio(if(i == "0") 2f else 1 / 1f),
+                    .weight(if(i == Symbol.DIGIT_0) 2f else 1f)
+                    .aspectRatio(if(i == Symbol.DIGIT_0) 2f else 1 / 1f),
                 symbol = i,
                 boxColor = color
             )
@@ -202,12 +220,5 @@ private fun RowsCalcButton(
     }
 }
 
-private fun checkACButton(symbol: String) {
-    when(symbol) {
-        "AC" -> {
-            expression.value = ""
-            expressionBottom.value = ""
-        }
-    }
-}
+
 
