@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import com.example.androidcalculator.Data.Symbol
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.mariuszgromada.math.mxparser.Expression
+import kotlin.math.exp
 import kotlin.random.Random
 
 class CalculatorViewModel: ViewModel() {
@@ -17,24 +19,67 @@ class CalculatorViewModel: ViewModel() {
 
     val state = _state.asStateFlow()
 
+    private var expression = ""
+
     fun processCommand(command: CalculatorCommand) {
         Log.d("CalculatorViewModel", "Command: $command")
         when(command) {
             CalculatorCommand.Clear -> {
+                expression = ""
                 _state.value = CalculatorState.Initial
             }
             CalculatorCommand.Evaluate -> {
-                when(Random.nextBoolean()) {
-                    true -> _state.value = CalculatorState.Error("100/0")
-                    false -> _state.value = CalculatorState.Success("100")
+                val result = evaluate()
+                if (result != null) {
+                    _state.value = CalculatorState.Success(result)
+                } else {
+                    _state.value = CalculatorState.Error(expression)
                 }
             }
             is CalculatorCommand.Input -> {
+                val symbol = if (command.symbol != Symbol.PARENTHESIS) {
+                    command.symbol.displayText
+                } else {
+                    getCorrectParenthesis()
+                }
+                expression += symbol
                 _state.value = CalculatorState.Input(
-                    expression = command.symbol.name,
-                    result = "100"
+                    expression = expression,
+                    result = evaluate() ?: ""
                 )
             }
+            is CalculatorCommand.Delete -> {
+                expression = delete()
+                _state.value = CalculatorState.Input(
+                    expression = expression,
+                    result = evaluate() ?: ""
+                )
+            }
+        }
+    }
+
+    private fun evaluate(): String? {
+        return expression
+            .replace('x', '*')
+            .replace(',', '.')
+            .let{ Expression(it) }
+            .calculate()
+            .takeIf { it.isFinite() } ?.toString()
+    }
+
+    private fun delete(): String {
+        return expression.dropLast(1)
+    }
+
+    private fun getCorrectParenthesis(): String {
+        val openCount = expression.count { it == '('}
+        val closeCount = expression.count { it == ')' }
+        return when {
+            expression.isEmpty() -> "("
+            !expression.last().isDigit() && expression.last() != ')' && expression.last() != 'π'
+                -> "("
+            openCount > closeCount -> ")"
+            else -> "("
         }
     }
 }
@@ -57,4 +102,5 @@ sealed interface CalculatorCommand {
     data object Clear: CalculatorCommand
     data object Evaluate: CalculatorCommand
     data class Input(val symbol: Symbol): CalculatorCommand
+    data object Delete: CalculatorCommand
 }

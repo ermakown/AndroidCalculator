@@ -1,7 +1,9 @@
 package com.example.androidcalculator
 
+import android.R.attr.fontWeight
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,8 +12,10 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,7 +46,7 @@ fun Calculator(
     viewModel: CalculatorViewModel = viewModel()
 ) {
     val state = viewModel.state.collectAsState()
-
+    val scrollState = rememberScrollState()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -61,7 +65,8 @@ fun Calculator(
                     )
                 )
                 .background(color = MaterialTheme.colorScheme.primaryContainer)
-                .weight(1f),
+                .weight(1f)
+                .verticalScroll(scrollState),
             contentAlignment = Alignment.BottomEnd
         ) {
             Column(
@@ -73,12 +78,14 @@ fun Calculator(
                     is CalculatorState.Error -> {
                         Text(
                             text = currentState.error,
+                            lineHeight = 36.sp,
                             fontSize = 36.sp,
                             color = MaterialTheme.colorScheme.error,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = "",
+                            lineHeight = 17.sp,
                             fontSize = 17.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.SemiBold
@@ -88,12 +95,14 @@ fun Calculator(
                     is CalculatorState.Input -> {
                         Text(
                             text = currentState.expression,
+                            lineHeight = 36.sp,
                             fontSize = 36.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = currentState.result,
+                            lineHeight = 17.sp,
                             fontSize = 17.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.SemiBold
@@ -102,12 +111,14 @@ fun Calculator(
                     is CalculatorState.Success -> {
                         Text(
                             text = currentState.result,
+                            lineHeight = 36.sp,
                             fontSize = 36.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = "",
+                            lineHeight = 17.sp,
                             fontSize = 17.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.SemiBold
@@ -208,6 +219,7 @@ private fun CalcButton(
                 val command = when(symbol) {
                     Symbol.CLEAR -> CalculatorCommand.Clear
                     Symbol.EVALUATE -> CalculatorCommand.Evaluate
+                    Symbol.DELETE -> CalculatorCommand.Delete
                     else -> CalculatorCommand.Input(symbol)
                 }
                 viewModel.processCommand(command)
@@ -249,8 +261,8 @@ private fun RowsCalcButton(
 
             CalcButton(
                 modifier = Modifier
-                    .weight(if(i == Symbol.DIGIT_0) 2f else 1f)
-                    .aspectRatio(if(i == Symbol.DIGIT_0) 2f else 1 / 1f),
+                    .weight(1f)
+                    .aspectRatio(1 / 1f),
                 symbol = i,
                 boxColor = color
             )
