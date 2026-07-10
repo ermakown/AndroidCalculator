@@ -1,6 +1,9 @@
 package com.example.androidcalculator.Data
 
 import android.icu.lang.UCharacter.DecompositionType.SUB
+import android.icu.util.MeasureUnit.DOT
+import org.mariuszgromada.math.mxparser.syntaxchecker.SyntaxCheckerConstants.FACTORIAL
+import org.mariuszgromada.math.mxparser.syntaxchecker.SyntaxCheckerConstants.POWER
 
 enum class Symbol(val displayText: String) {
     DIGIT_0("0"),
@@ -16,8 +19,9 @@ enum class Symbol(val displayText: String) {
     CLEAR("AC"),
     EVALUATE("="),
     ADD("+"),
+    DELETE("⌫"),
     SUBTRACT("-"),
-    MULTIPLY("X"),
+    MULTIPLY("x"),
     DIVIDE("÷"),
     PERCENT("%"),
     POWER("^"),
@@ -34,7 +38,7 @@ enum class Symbol(val displayText: String) {
         val secondList = listOf(DIGIT_7, DIGIT_8, DIGIT_9, MULTIPLY)
         val thirdList = listOf(DIGIT_4, DIGIT_5, DIGIT_6, SUBTRACT)
         val fourthList = listOf(DIGIT_1, DIGIT_2, DIGIT_3, ADD)
-        val fifthList = listOf(DIGIT_0, DOT, EVALUATE)
+        val fifthList = listOf(DIGIT_0, DOT, DELETE, EVALUATE)
 
         val blueSymbolBoxes = listOf(PARENTHESIS, PERCENT, DIVIDE, MULTIPLY, SUBTRACT, ADD, EVALUATE)
     }
